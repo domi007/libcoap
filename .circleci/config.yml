@@ -9,7 +9,9 @@ jobs:
       - checkout
       - run: choco install openssl
       - run: |
-          dir C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\
+          mkdir .\win32\lib
+          xcopy "C:\Program Files\OpenSSL-Win64\include" .\include /s /y
+          xcopy "C:\Program Files\OpenSSL-Win64\lib" .\win32\lib /s /y
           $Env:PATH += ";C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\"
           devenv.exe .\win32\libcoap.sln /Build "Release DLL" /Project libcoap /Project "coap-client"
       - run: type ".\win32\x64\Release DLL\libcoap.log"
