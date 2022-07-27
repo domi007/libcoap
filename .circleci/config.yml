@@ -8,7 +8,7 @@ jobs:
     steps:
       - checkout
       - run: choco install openssl
-      - run: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\devenv.exe ".\win32\libcoap.sln" /Build "Release DLL" /Project "libcoap" /Project "coap-client"'
+      - run: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\devenv.exe" ".\win32\libcoap.sln" /Build "Release DLL" /Project "libcoap" /Project "coap-client"'
       - run: type ".\win32\x64\Release DLL\libcoap.log"
       - store_artifacts:
           path: '.\win32\x64\Release DLL\coap-client.exe'
