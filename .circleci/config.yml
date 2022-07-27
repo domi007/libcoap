@@ -9,6 +9,7 @@ jobs:
       - checkout
       - run: choco install openssl
       - run: devenv.exe ".\win32\libcoap.sln" /Build "Release DLL" /Project "libcoap" /Project "coap-client"
+      - run: type ".\win32\x64\Release DLL\libcoap.log"
       - store_artifacts:
           path: '.\win32\x64\Release DLL\coap-client.exe'
       - store_artifacts:
