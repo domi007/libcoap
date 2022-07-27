@@ -1,0 +1,19 @@
+version: '2.1'
+orbs:
+  win: circleci/windows@4.1
+jobs:
+  build:
+    executor:
+      name: win/default
+    steps:
+      - checkout
+      - run: choco install openssl
+      - run: devenv.exe" ".\win32\libcoap.sln" /Build "Release DLL" /Project "libcoap" /Project "coap-client"
+      - store_artifacts:
+          path: '.\win32\x64\Release DLL\coap-client.exe'
+      - store_artifacts:
+          path: '%ProgramFiles%\OpenSSL-Win64\bin\libssl-1_1-x64.dll'
+workflows:
+  my-workflow:
+    jobs:
+      - build
