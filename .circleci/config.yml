@@ -42,8 +42,11 @@ workflows:
   coap-client-build-release:
     jobs:
       - build
-      - release:
+      - hold:
           type: approval
           requires:
             - build
+      - release:
+          requires:
+            - hold
           context: GitHub Public Repo Access
