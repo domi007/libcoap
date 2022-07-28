@@ -21,7 +21,7 @@ jobs:
           xcopy 'C:\Program Files\OpenSSL-Win64\bin\*' release_x64
           Compress-Archive -Path .\release_x64\* -DestinationPath .\coap-client_win64.zip
       - store_artifacts:
-          path: '.coap-client_win64.zip'
+          path: 'coap-client_win64.zip'
 workflows:
   coap-client:
     jobs:
