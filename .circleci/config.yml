@@ -17,12 +17,33 @@ jobs:
       - run: type ".\win32\x64\Release DLL\libcoap.log"
       - run: |
           mkdir release_x64
-          xcopy /Y ".\win32\x64\Release DLL\*" release_x64
-          xcopy 'C:\Program Files\OpenSSL-Win64\bin\*' release_x64
+          xcopy /Y ".\win32\x64\Release DLL\*.exe" release_x64
+          xcopy /Y ".\win32\x64\Release DLL\*.dll" release_x64
+          xcopy 'C:\Program Files\OpenSSL-Win64\bin\*.dll' release_x64
           Compress-Archive -Path .\release_x64\* -DestinationPath .\coap-client_win64.zip
       - store_artifacts:
           path: 'coap-client_win64.zip'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - "coap-client_win64.zip"
+  release:
+    docker:
+      - image: cibuilds/github:0.13
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run: |
+          VERSION=$(date +"%Y-%m-%dT%H-%M-%S")-${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+          ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
+
+      
 workflows:
-  coap-client:
+  coap-client-build-release:
     jobs:
       - build
+      - release:
+          type: approval
+          requires:
+            - build
+          context: GitHub Public Repo Access
