@@ -1,0 +1,52 @@
+version: '2.1'
+orbs:
+  win: circleci/windows@4.1
+jobs:
+  build:
+    executor:
+      name: win/default
+    steps:
+      - checkout
+      - run: choco install openssl
+      - run: |
+          mkdir .\win32\lib
+          xcopy "C:\Program Files\OpenSSL-Win64\include" .\include /s /y
+          xcopy "C:\Program Files\OpenSSL-Win64\lib" .\win32\lib /s /y
+          $Env:PATH += ";C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\"
+          devenv.exe .\win32\libcoap.sln /Build "Release DLL" /Project libcoap /Project "coap-client"
+      - run: type ".\win32\x64\Release DLL\libcoap.log"
+      - run: |
+          mkdir release_x64
+          xcopy /Y ".\win32\x64\Release DLL\*.exe" release_x64
+          xcopy /Y ".\win32\x64\Release DLL\*.dll" release_x64
+          xcopy 'C:\Program Files\OpenSSL-Win64\bin\*.dll' release_x64
+          Compress-Archive -Path .\release_x64\* -DestinationPath .\coap-client_win64.zip
+      - store_artifacts:
+          path: 'coap-client_win64.zip'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - "coap-client_win64.zip"
+  release:
+    docker:
+      - image: cibuilds/github:0.13
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run: |
+          VERSION=$(date +"%Y-%m-%dT%H-%M-%S")-${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+          ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
+
+      
+workflows:
+  coap-client-build-release:
+    jobs:
+      - build
+      - hold:
+          type: approval
+          requires:
+            - build
+      - release:
+          requires:
+            - hold
+          context: GitHub Public Repo Access
