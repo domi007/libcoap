@@ -15,11 +15,14 @@ jobs:
           $Env:PATH += ";C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\"
           devenv.exe .\win32\libcoap.sln /Build "Release DLL" /Project libcoap /Project "coap-client"
       - run: type ".\win32\x64\Release DLL\libcoap.log"
+      - run: |
+          mkdir release_x64
+          xcopy /Y ".\win32\x64\Release DLL\*" release_x64
+          xcopy 'C:\Program Files\OpenSSL-Win64\bin\*' release_x64
+          Compress-Archive -Path .\release_x64\* -DestinationPath .\coap-client_win64.zip
       - store_artifacts:
-          path: '.\win32\x64\Release DLL\coap-client.exe'
-      - store_artifacts:
-          path: 'C:\Program Files\OpenSSL-Win64\bin\libssl-1_1-x64.dll'
+          path: '.coap-client_win64.zip'
 workflows:
-  my-workflow:
+  coap-client:
     jobs:
       - build
